@@ -26,37 +26,32 @@ class TestPlayer(unittest.TestCase):
         self.player.walkUp()
         assert self.player.rect.top == 198, "player did not move up"
 
-    def testPlayerWalksUpGroundSameSize(self):
+    def dummy_grounds(self, *args):
         grounds = pygame.sprite.Group()
-        ground1 = Ground([64, 198])
-        grounds.add(ground1)
-        self.player.collision_grounds = grounds
+        for arg in args:
+            ground = Ground(arg)
+            grounds.add(ground)
+        return grounds
+
+    def testPlayerWalksUpGroundSameSize(self):
+        self.player.collision_grounds = self.dummy_grounds([64, 198])
         self.player.walkUp()
         assert self.player.rect.top == 197, "player did not move up"
 
     def testPlayerWalksUpThreePixelsGroundSameSize(self):
-        grounds = pygame.sprite.Group()
-        ground1 = Ground([64, 198])
-        grounds.add(ground1)
-        self.player.collision_grounds = grounds
+        self.player.collision_grounds = self.dummy_grounds([64, 198])
         self.player.walkUp()
         self.player.walkUp()
         self.player.walkUp()
         assert self.player.rect.top == 195, "player did not move up three pixels"
 
     def testPlayerWontWalkUpOffAboveGround(self):
-        grounds = pygame.sprite.Group()
-        ground1 = Ground([64, 214])
-        grounds.add(ground1)
-        self.player.collision_grounds = grounds
+        self.player.collision_grounds = self.dummy_grounds([64, 214])
         self.player.walkUp()
         assert self.player.rect.top == 198, "player should not move up"
 
     def testPlayerWontWalkUpBottomOffGround(self):
-        grounds = pygame.sprite.Group()
-        ground1 = Ground([64, 212])
-        grounds.add(ground1)
-        self.player.collision_grounds = grounds
+        self.player.collision_grounds = self.dummy_grounds([64, 212])
         self.player.walkUp()
         self.player.walkUp()
         self.player.walkUp()
@@ -77,53 +72,42 @@ class TestPlayer(unittest.TestCase):
         assert self.player.rect.bottom == 214, "player should not have moved"
 
     def testPlayerWalksDownGroundThreePixelsAbove(self):
-        grounds = pygame.sprite.Group()
-        ground1 = Ground([64, 202])
-        grounds.add(ground1)
-        self.player.collision_grounds = grounds
+        self.player.collision_grounds = self.dummy_grounds([64, 202])
         self.player.walkDown()
         assert self.player.rect.bottom == 215, "player should not have moved"
 
     def testPlayerWalksDownGroundTopSameLevelAsBottom(self):
-        grounds = pygame.sprite.Group()
-        ground1 = Ground([64, 214])
-        grounds.add(ground1)
-        self.player.collision_grounds = grounds
+        self.player.collision_grounds = self.dummy_grounds([64, 214])
         self.player.walkDown()
         assert self.player.rect.top == 199, "player should have moved"
 
     def testPlayerWalksDownTwoPixelsGroundAboveThree(self):
-        grounds = pygame.sprite.Group()
-        ground1 = Ground([64, 200])
-        grounds.add(ground1)
-        self.player.collision_grounds = grounds
+        self.player.collision_grounds = self.dummy_grounds([64, 200])
         self.player.walkDown()
         self.player.walkDown()
         self.player.walkDown()
         assert self.player.rect.top == 200, "player should have moved only 2 pixels"
         
     def testPlayerWalksDownBetweenGrounds(self):
-        grounds = pygame.sprite.Group()
-        ground1 = Ground([64, 200])
-        ground2 = Ground([64, 216])
-        grounds.add(ground1, ground2)
-        self.player.collision_grounds = grounds
+        self.player.collision_grounds = self.dummy_grounds([64, 200], [64, 216])
         self.player.walkDown()
         self.player.walkDown()
         self.player.walkDown()
         assert self.player.rect.bottom == 217, "player should have moved only 2 pixels"
-        
-    def testPlayerWalksDownMeh(self):
-        grounds = pygame.sprite.Group()
-        ground1 = Ground([64, 184])
-        ground2 = Ground([64, 200])
-        grounds.add(ground1, ground2)
-        self.player.collision_grounds = grounds
+
+    def testPlayerWalksDownOnSecondGround(self):
+        self.player.collision_grounds = self.dummy_grounds([64, 184], [64, 200])
         self.player.walkDown()
         self.player.walkDown()
         self.player.walkDown()
         assert self.player.rect.bottom == 216, "player should have moved only 2 pixels"
 
+    # jumpin
+    def testPlayerOnJumpUpsOnePixel(self):
+        self.player.collision_grounds = self.dummy_grounds([64, 184], [64, 200])
+        self.player.jump()
+        self.player.update()
+        assert self.player.rect.top == 195, "player should have jumped 3 pixels up"
 
 class TestPlayerDraw(unittest.TestCase):
 	def testDrawPlayer(self):

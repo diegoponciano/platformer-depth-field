@@ -89,12 +89,29 @@ class Player(pygame.sprite.Sprite):
         self.image.fill((255, 200, 0))
         self.rect = self.image.get_rect(topleft=pos)
         self.collision_grounds = []
+        self.movement = None
+
+    def update(self):
+        if self.movement:
+            self.movement()
 
     def control(self, key):
         if key[K_UP]:
             self.walkUp()
         if key[K_DOWN]:
             self.walkDown()
+        if key[K_SPACE]:
+            self.jump()
+
+    # movements
+    def jumping(self):
+        self.rect = self.rect.move(0, self.jump_speed)
+        if self.jump_speed < 5:
+            self.jump_speed += 0.3
+
+    def jump(self):
+        self.jump_speed = -3
+        self.movement = self.jumping
 
     def walkUp(self):
         move = False
@@ -112,7 +129,7 @@ class Player(pygame.sprite.Sprite):
                 move = True
         if move:
             self.rect = new_rect
-            
+
 class Ground(pygame.sprite.Sprite):
     def __init__(self, pos, size=(16, 16)):
         pygame.sprite.Sprite.__init__(self)
@@ -152,7 +169,6 @@ class PlatformerGame:
         x, y = 0, 0
         for row in self.map.split("\n"):
             for char in row:
-    
                 #Spawn a platform if the character is a 1
                 if char == "1":
                     platform = Platform([x*16, y*16]) 
@@ -162,14 +178,13 @@ class PlatformerGame:
                     ground = Ground([x*16, y*16]) 
                     self.grounds.add(ground)
                     self.sprites.add(ground)
-    
             #Update the read position.
                 x += 1
             x = 0
             y += 1
 
     def main(self):
-        
+
         #Init pygame
         os.environ["SDL_VIDEO_CENTERED"] = "1"
         pygame.init()
@@ -200,6 +215,7 @@ class PlatformerGame:
             #Update
             clock.tick(60)
             self.sprites.update()
+
             key = pygame.key.get_pressed()
             player.control(key)
 
@@ -212,10 +228,11 @@ class PlatformerGame:
                     if e.key == K_ESCAPE:
                         pygame.quit()
                         return
-                    if e.key == K_SPACE:
-                        if not player.jumping:
-                            player.jump_speed = -5.5
-                            player.jumping = True
+                    #if e.key == K_SPACE:
+                        #print 'waiting'
+                        #if not player.jumping:
+                            #player.jump_speed = -5.5
+                            #player.jumping = True
 
             #Draw the scene
             screen.fill((0, 0, 0))
