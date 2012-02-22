@@ -83,113 +83,183 @@ class Player2(pygame.sprite.Sprite):
             self.__move(0, dy)
  
 class Player(pygame.sprite.Sprite):
-    def __init__(self, position=[64,198]):
+    def __init__(self, pos=[64,198]):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.Surface((16, 16))
-        self.rect = self.image.get_rect(topleft=position)
+        self.image.fill((255, 200, 0))
+        self.rect = self.image.get_rect(topleft=pos)
+        self.collision_grounds = []
+        self.stand_on_ground()
 
-        #pygame.sprite.Sprite.__init__(self, self.groups)
-        #self.image = pygame.Surface((16, 16))
-        #self.image.fill((255, 200, 0))
-        #self.rect = self.image.get_rect(topleft=[64, 0])
-        #self.jump_speed = 0
-        #self.jumping = False
-           
+    def update(self):
+        if self.movement:
+            self.movement()
+
+    def control(self, key):
+        if key[K_UP]:
+            self.walkUp()
+        if key[K_DOWN]:
+            self.walkDown()
+        if key[K_SPACE] and self.movement == self.standing:
+            self.jump()
+
+    # movements
+    def jumping(self):
+        self.rect = self.rect.move(0, self.jump_speed)
+        if self.jump_speed > 0:
+            self.movement = self.falling
+        else:
+            self.jump_speed += 0.3
+
+    def falling(self):
+        new_rect = self.rect.move(0, self.jump_speed)
+        if self.jump_speed < 5:
+            self.jump_speed += 0.2
+        if new_rect.top >= self.ground:
+            upmove = self.ground - self.rect.top
+            self.rect = self.rect.move(0, upmove)
+            self.stand_on_ground()
+        else:
+            self.rect = self.rect.move(0, self.jump_speed)
+
+    def standing(self):
+        pass
+
+    def stand_on_ground(self):
+        self.movement = self.standing
+        self.jump_speed = -5
+        self.ground = 0
+
+    def jump(self):
+        self.ground = self.rect.top
+        self.movement = self.jumping
+
+    def walkUp(self):
+        move = False
+        for ground in self.collision_grounds:
+            if(self.rect.colliderect(ground.rect)):
+                move = True
+        if move:
+            self.rect = self.rect.move(0, -1)
+
+    def walkDown(self):
+        move = False
+        new_rect = self.rect.move(0, 1)
+        for ground in self.collision_grounds:
+            if(ground.rect.collidepoint(new_rect.left, new_rect.bottom-1)):
+                move = True
+        if move:
+            self.rect = new_rect
+
+class Ground(pygame.sprite.Sprite):
+    def __init__(self, pos, size=(16, 16)):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.Surface(size)
+        self.image.fill((0, 124, 0))
+        self.rect = self.image.get_rect(topleft=pos)
+
 class Platform(pygame.sprite.Sprite):
-    def __init__(self, pos):
-        pygame.sprite.Sprite.__init__(self, self.groups)
-        self.image = pygame.Surface((16, 16))
+    def __init__(self, pos, size=(16, 16)):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.Surface(size)
         self.image.fill((255, 255, 255))
         self.rect = self.image.get_rect(topleft=pos)
 
-map = """1..................1
+class PlatformerGame:
+    def __init__(self):
+        self.groups = []
+        self.map = """1..................1
+1..................1
+11111..............1
 1..................1
 1..................1
-1..................1
-1..................1
-1..................1
-1..................1
-1..................1
-1..................1
-1..................1
-1..................1
-1..................1
-1..................1
-1..................1
+1......111.........1
+1.....11.....1.....1
+1.....1............1
+1.....1.........1111
+1...111............1
+1.............1....1
+11...........1.....1
+12222222222222222221
+12222222222222222221
 11111111111111111111
 """
 
-def parse_level():
-    #Parse the level
-    x, y = 0, 0
-    for row in map.split("\n"):
-        for char in row:
+    def parse_level(self):
+        #Parse the level
+        x, y = 0, 0
+        for row in self.map.split("\n"):
+            for char in row:
+                #Spawn a platform if the character is a 1
+                if char == "1":
+                    platform = Platform([x*16, y*16]) 
+                    self.platforms.add(platform)
+                    self.sprites.add(platform)
+                elif char == "2":
+                    ground = Ground([x*16, y*16]) 
+                    self.grounds.add(ground)
+                    self.sprites.add(ground)
+            #Update the read position.
+                x += 1
+            x = 0
+            y += 1
 
-            #Spawn a platform if the character is a 1
-            if char == "1":
-                Platform([x*16, y*16]) 
+    def main(self):
 
-        #Update the read position.
-            x += 1
-        x = 0
-        y += 1
-        
-        
-def main():
-    
-    #Init pygame
-    os.environ["SDL_VIDEO_CENTERED"] = "1"
-    pygame.init()
-    
-    #Set the display mode
-    pygame.display.set_caption("Platformer Field Depth")
-    screen = pygame.display.set_mode((320, 240))
-    
-    #Create some groups. I like to use OrderedUpdates
-    sprites = pygame.sprite.OrderedUpdates()
-    platforms = pygame.sprite.OrderedUpdates()
-   
-    #Set the sprites' groups
-    Player.groups = sprites
-    Platform.groups = sprites, platforms
-    
-    #The player will loop through all the sprites contained in this
-    #group, and then collide with them.
-    Player.collision_sprites = platforms
-    
-    
-    #Create some starting objects
-    player = Player()
-    clock = pygame.time.Clock()
+        #Init pygame
+        os.environ["SDL_VIDEO_CENTERED"] = "1"
+        pygame.init()
+ 
+        #Set the display mode
+        pygame.display.set_caption("Platformer Field Depth")
+        screen = pygame.display.set_mode((320, 240))
 
-    #Create all the platforms by parsing the level.
-    parse_level()    
+        #Create some groups. I like to use OrderedUpdates
+        self.sprites = pygame.sprite.OrderedUpdates()
+        self.platforms = pygame.sprite.OrderedUpdates()
+        self.grounds = pygame.sprite.OrderedUpdates()
 
-    #Main loop
-    while 1:
-        
-        #Update
-        clock.tick(60)
-        sprites.update()
-        
-        #Get input
-        for e in pygame.event.get():
-            if e.type == QUIT:
-                pygame.quit()
-                return
-            if e.type == KEYDOWN:
-                if e.key == K_ESCAPE:
+        #Create some starting objects
+        player = Player()
+        player.collision_sprites = self.platforms
+        player.collision_grounds = self.grounds
+
+        #Create all the platforms by parsing the level.
+        self.parse_level()
+        self.sprites.add(player)
+
+        clock = pygame.time.Clock()
+
+        #Main loop
+        while 1:
+
+            #Update
+            clock.tick(60)
+            self.sprites.update()
+
+            key = pygame.key.get_pressed()
+            player.control(key)
+
+            #Get input
+            for e in pygame.event.get():
+                if e.type == QUIT:
                     pygame.quit()
                     return
-                if e.key == K_SPACE:
-                    if not player.jumping:
-                        player.jump_speed = -5.5
-                        player.jumping = True
-        
-        #Draw the scene
-        screen.fill((0, 0, 0))
-        sprites.draw(screen)
-        pygame.display.flip()
-        
+                if e.type == KEYDOWN:
+                    if e.key == K_ESCAPE:
+                        pygame.quit()
+                        return
+                    #if e.key == K_SPACE:
+                        #print 'waiting'
+                        #if not player.jumping:
+                            #player.jump_speed = -5.5
+                            #player.jumping = True
+
+            #Draw the scene
+            screen.fill((0, 0, 0))
+            self.sprites.draw(screen)
+            pygame.display.flip()
+
 if __name__ == "__main__":
-    main()
+    game = PlatformerGame()
+    game.main()
