@@ -103,11 +103,42 @@ class TestPlayer(unittest.TestCase):
         assert self.player.rect.bottom == 216, "player should have moved only 2 pixels"
 
     # jumpin
-    def testPlayerOnJumpUpsOnePixel(self):
+    def testPlayerJumpsUp(self):
         self.player.collision_grounds = self.dummy_grounds([64, 184], [64, 200])
         self.player.jump()
         self.player.update()
-        assert self.player.rect.top == 195, "player should have jumped 3 pixels up"
+        assert self.player.rect.top == 194, "player should have jumped 4 pixels up"
+        assert self.player.movement == self.player.jumping, 'player state should be jumping'
+
+    def testPlayerDontJumpIfAlreadyJumping(self):
+        self.player.collision_grounds = self.dummy_grounds([64, 184], [64, 200])
+        self.player.jump()
+        self.player.update()
+        assert self.player.movement == self.player.jumping, 'player state should be jumping'
+        assert self.player.rect.top == 194, "player should have jumped 4 pixels up"
+
+    def testPlayerOnJumpsUpAndFalls(self):
+        self.player.collision_grounds = self.dummy_grounds([64, 184], [64, 200])
+        self.player.jump()
+        while True:
+            self.player.update()
+            if self.player.jump_speed > 0:
+                break
+        self.player.update()
+        assert self.player.jump_speed > 0, "jump speed should be over 0"
+        assert self.player.jump_speed < 5, "jump speed should be under 5"
+        assert self.player.movement == self.player.falling, 'player state should be falling'
+
+    def testPlayerOnJumpsUpAndFallSameGround(self):
+        self.player.collision_grounds = self.dummy_grounds([64, 184], [64, 200])
+        self.player.jump()
+        for i in range(50):
+            self.player.update()
+        assert self.player.rect.top == 198, "player should have fallen at the same ground" 
+        assert self.player.movement == self.player.standing, 'player state should be standing'
+        assert self.player.ground == 0, 'player ground should be zero'
+        assert self.player.jump_speed == -4, 'player jump speed is reinitialized'
+
 
 class TestPlayerDraw(unittest.TestCase):
 	def testDrawPlayer(self):

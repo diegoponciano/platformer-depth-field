@@ -89,7 +89,7 @@ class Player(pygame.sprite.Sprite):
         self.image.fill((255, 200, 0))
         self.rect = self.image.get_rect(topleft=pos)
         self.collision_grounds = []
-        self.movement = None
+        self.stand_on_ground()
 
     def update(self):
         if self.movement:
@@ -100,17 +100,38 @@ class Player(pygame.sprite.Sprite):
             self.walkUp()
         if key[K_DOWN]:
             self.walkDown()
-        if key[K_SPACE]:
+        if key[K_SPACE] and self.movement == self.standing:
             self.jump()
 
     # movements
     def jumping(self):
         self.rect = self.rect.move(0, self.jump_speed)
+        if self.jump_speed > 0:
+            self.movement = self.falling
+        else:
+            self.jump_speed += 0.2
+
+    def falling(self):
+        new_rect = self.rect.move(0, self.jump_speed)
         if self.jump_speed < 5:
             self.jump_speed += 0.3
+        if new_rect.top >= self.ground:
+            upmove = new_rect.top - self.ground
+            self.rect = self.rect.move(0, upmove)
+            self.stand_on_ground()
+        else:
+            self.rect = self.rect.move(0, self.jump_speed)
+
+    def standing(self):
+        pass
+
+    def stand_on_ground(self):
+        self.movement = self.standing
+        self.jump_speed = -4
+        self.ground = 0
 
     def jump(self):
-        self.jump_speed = -3
+        self.ground = self.rect.top
         self.movement = self.jumping
 
     def walkUp(self):
