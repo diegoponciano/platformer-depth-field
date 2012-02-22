@@ -109,14 +109,14 @@ class Player(pygame.sprite.Sprite):
         if self.jump_speed > 0:
             self.movement = self.falling
         else:
-            self.jump_speed += 0.2
+            self.jump_speed += 0.3
 
     def falling(self):
         new_rect = self.rect.move(0, self.jump_speed)
         if self.jump_speed < 5:
-            self.jump_speed += 0.3
+            self.jump_speed += 0.2
         if new_rect.top >= self.ground:
-            upmove = new_rect.top - self.ground
+            upmove = self.ground - self.rect.top
             self.rect = self.rect.move(0, upmove)
             self.stand_on_ground()
         else:
@@ -127,7 +127,7 @@ class Player(pygame.sprite.Sprite):
 
     def stand_on_ground(self):
         self.movement = self.standing
-        self.jump_speed = -4
+        self.jump_speed = -5
         self.ground = 0
 
     def jump(self):

@@ -107,15 +107,8 @@ class TestPlayer(unittest.TestCase):
         self.player.collision_grounds = self.dummy_grounds([64, 184], [64, 200])
         self.player.jump()
         self.player.update()
-        assert self.player.rect.top == 194, "player should have jumped 4 pixels up"
+        assert self.player.rect.top == 193, "player should have jumped 4 pixels up"
         assert self.player.movement == self.player.jumping, 'player state should be jumping'
-
-    def testPlayerDontJumpIfAlreadyJumping(self):
-        self.player.collision_grounds = self.dummy_grounds([64, 184], [64, 200])
-        self.player.jump()
-        self.player.update()
-        assert self.player.movement == self.player.jumping, 'player state should be jumping'
-        assert self.player.rect.top == 194, "player should have jumped 4 pixels up"
 
     def testPlayerOnJumpsUpAndFalls(self):
         self.player.collision_grounds = self.dummy_grounds([64, 184], [64, 200])
@@ -132,12 +125,12 @@ class TestPlayer(unittest.TestCase):
     def testPlayerOnJumpsUpAndFallSameGround(self):
         self.player.collision_grounds = self.dummy_grounds([64, 184], [64, 200])
         self.player.jump()
-        for i in range(50):
+        for i in range(60):
             self.player.update()
         assert self.player.rect.top == 198, "player should have fallen at the same ground" 
         assert self.player.movement == self.player.standing, 'player state should be standing'
         assert self.player.ground == 0, 'player ground should be zero'
-        assert self.player.jump_speed == -4, 'player jump speed is reinitialized'
+        assert self.player.jump_speed == -5, 'player jump speed is reinitialized'
 
 
 class TestPlayerDraw(unittest.TestCase):
