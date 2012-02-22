@@ -1,3 +1,8 @@
+About
+==================
+
+Game created to understand the logics behind a 2D platformer using a simple system of depth of field (like Golden Axe, Streets of Rage, Castle Crashers).
+
 Development
 ==================
 
@@ -6,9 +11,6 @@ Development
     sudo apt-get install pygame
     pip install nose rednose autonose
 
-### Install dependencies
-
-    python setup.py develop
 
 Tests
 ==================
