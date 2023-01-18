@@ -125,9 +125,9 @@ class TestPlayer(unittest.TestCase):
     def testPlayerOnJumpsUpAndFallSameGround(self):
         self.player.collision_grounds = self.dummy_grounds([64, 184], [64, 200])
         self.player.jump()
-        for i in range(60):
+        for _ in range(60):
             self.player.update()
-        assert self.player.rect.top == 198, "player should have fallen at the same ground" 
+        assert self.player.rect.top == 198, "player should have fallen at the same ground"
         assert self.player.movement == self.player.standing, 'player state should be standing'
         assert self.player.ground == 0, 'player ground should be zero'
         assert self.player.jump_speed == -5, 'player jump speed is reinitialized'
