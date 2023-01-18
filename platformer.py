@@ -209,7 +209,7 @@ class PlatformerGame:
         #Init pygame
         os.environ["SDL_VIDEO_CENTERED"] = "1"
         pygame.init()
- 
+
         #Set the display mode
         pygame.display.set_caption("Platformer Field Depth")
         screen = pygame.display.set_mode((320, 240))
@@ -245,16 +245,9 @@ class PlatformerGame:
                 if e.type == QUIT:
                     pygame.quit()
                     return
-                if e.type == KEYDOWN:
-                    if e.key == K_ESCAPE:
-                        pygame.quit()
-                        return
-                    #if e.key == K_SPACE:
-                        #print 'waiting'
-                        #if not player.jumping:
-                            #player.jump_speed = -5.5
-                            #player.jumping = True
-
+                if e.type == KEYDOWN and e.key == K_ESCAPE:
+                    pygame.quit()
+                    return
             #Draw the scene
             screen.fill((0, 0, 0))
             self.sprites.draw(screen)
